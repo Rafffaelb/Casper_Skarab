@@ -1,0 +1,161 @@
+############### INSTALL MLIB_DEVEL PACKAGE ##############
+
+1. Install MATLAB 2021a / Simulink
+
+cd /path/to/matlab/download/matlab_R2021a_glnxa64.zip
+mkdir matlab_R2021a
+unzip matlab_R2021a_glnxa64.zip -d matlab_R2021a
+cd matlab_R2021a
+sudo ./install
+
+**** Insert license.lic into MATLAB *****
+
+	cd /path/to/MATLAB/R2021a/bin (my case: /usr/local/MATLAB/R2021a/bin)
+	sudo ./activate_matlab.sh
+	
+2. Launch MATLAB
+	.matlab in /path/to/MATLAB/R2021a/bin (my case: /usr/local/MATLAB/R2021a/bin)
+
+**** If it shows Gtk-Message: 10:32:31.466: Failed to load module "canberra-gtk-module"
+then
+	Solution: 
+		sudo apt-get install libcanberra-gtk* libgconf-2-4
+		sudo ln -s /usr/lib/x86_64-linux-gnu/gtk-2.0/modules/libcanberra-gtk-module.so /usr/lib/libcanberra-gtk-module.so
+
+3. Before install Vivado, install the following basic packages
+	sudo apt-get install libstdc++6
+	sudo apt-get install libgtk2.0-0
+	sudo apt-get install dpkg-dev
+	sudo apt install python3-pip
+	sudo apt install python-dev
+	sudo apt install libtinfo5 libncurses5
+	sudo add-apt-repository ppa:rock-core/qt4
+	sudo apt update
+	sudo apt install libqtcore4 libqtgui4
+	
+4. Install Vivado 2021.1
+	sudo chmod +x <file>.bin
+	sudo ./<file>.bin
+	-> After Vivado Installation, implement the Xilinx license (Xilinx.lic).
+    
+****** Launch Vivado ******
+	go to /tools/Xilinx/Vivado/2021.1/bin
+	then, sudo ./vivado
+	click "Help" and "Add Design Tools or Devices" to install Vitis
+
+5. Install Vitis
+
+6. Test Model Composer
+	go to "/tools/Xilinx/Model_Composer/2021.1/bin" and "./model_composer"
+	
+****** If you get "symbol lookup error: /lib/x86_64-linux-gnu/libgnutls.so.30: undefined symbol: __gmpz_limbs_write" or "Caught "std::exception" Exception message is:
+Error loading /tools/mlabR2021a/bin/glnxa64/builtins/sl_main/mwlibmwsimulink_builtinimpl.so. /lib/x86_64-linux-gnu/libhogweed.so.6: undefined symbol: __gmpn_cnd_sub_n: Success: Success", you must try the following solution:
+
+	Solution:
+		The solution is to replace all of Xilinx's libgmp.so.10 with Ubuntu's version. To find them search with
+
+		cd $XILINX_PATH
+		find . -name libgmp.so.10
+		
+		Then, replace the Xilinx's libgmp.so.10 by Ubuntu's version using
+		
+		sudo cp -r /lib/x86_64-linux-gnu/libgmp.so.10 ./
+	
+
+7. Install python environement package.
+	-> sudo apt install python3-venv
+	create virtual environment: python3 -m venv casper_venv
+	Activate python environment (python3): source casper_venv/bin/activate
+    
+8.  Download the Toolflow mlib_devel
+	-> git clone -b m2021a https://github.com/casper-astro/mlib_devel
+	->Open it : cd mlib_devel
+	-> Install requirements : pip3 install -r requirements.txt
+
+9. Last steps before run Model Composer through mlib_devel package
+
+	Run the following commands:
+
+    sudo ln -s /usr/include/asm-generic /usr/include/asm
+    sudo ln -s /usr/include/x86_64-linux-gnu/sys /usr/include/sys
+    sudo ln -s /usr/include/x86_64-linux-gnu/bits /usr/include/bits
+    sudo ln -s /usr/include/x86_64-linux-gnu/gnu /usr/include/gnu
+    
+    sudo cp -r /usr/bin/as /tools/Xilinx/Vivado/2021.1/tps/lnx64/binutils-2.26/bin/as
+    
+10. Create your project directory
+
+	mkdir my_project (it can locate home or Documents)
+	sudo ln -s ~/mlib_devel/startsg startsg
+	cp ~/mlib_devel/startsg.local.example startsg.local.<my_file>
+	
+11. Configure startsg.local.<my_file>
+
+	export XILINX_PATH=/tools/Xilinx/Vivado/2021.1
+	export MATLAB_PATH=/usr/local/MATLAB/R2021a
+	export COMPOSER_PATH=/tools/Xilinx/Model_Composer/2021.1
+	export PLATFORM=lin64
+	export JASPER_BACKEND=vivado
+	export LD_PRELOAD=${LD_PRELOAD}:"/usr/lib/x86_64-linux-gnu/libexpat.so"
+
+	# Activate a python3 virtual-environment on load
+	export CASPER_PYTHON_VENV_ON_START=/home/bingo/casper_venv
+
+12. Run it through the python3 environment!
+	
+	./startsg startsg.local.<my_file>     
+	
+	My example: (casper_venv) bingo@bingo:~/Documents/rafael_project$ ./startsg startsg.local.rafael
+
+
+***** Possible problems with Model Composer and Xilinx License ********
+		
+1. I get the following error (S-function) message, when trying to build with the "System Generator" Block in Simulink (LM_LICENSE_FILE is not set on <my_model>_error.log):
+
+"Sysgen license checkout failed. XILINXD_LICENSE_FILE = C:\Users\Administrator\AppData\Roaming\XilinxLicense\Xilinx.lic;C:/Xilinx/Vivado/2018.2/data/sysgen/hwcosim_compiler/pp_ethernet Environment variable LM_LICENSE_FILE is not set.
+
+	Solution:
+	
+		Copy license (Xilinx.lic) to the path showed by my_model which is not setted up.
+		
+	(My Example) -----
+	
+	S-function error (This is a SysGen error!)
+
+	--------------------------------- Version Log ----------------------------------
+	Version                                 Path
+	System Generator 2021.1                 /tools/Xilinx/Vivado/2021.1
+	Matlab 9.10.0.2198249 (R2021a) Update 8 /usr/local/MATLAB/R2021a
+	Vivado 2021.1                           /tools/Xilinx/Vivado/2021.1
+	--------------------------------------------------------------------------------
+	Summary of Errors:
+	Error 0001: Sysgen license checkout failed.
+	 XILINXD_LICENSE_FILE = /...
+	     Block: Unspecified
+	--------------------------------------------------------------------------------
+
+	Error 0001:
+
+	Reported by:
+	  Unspecified
+
+	Details:
+	Sysgen license checkout failed.
+	 XILINXD_LICENSE_FILE = /tools/Xilinx/Vivado/2021.1/data/sysgen/hwcosim_compiler/pp_ethernet
+	 Environment variable LM_LICENSE_FILE is not set.
+	 License search path: /home/bingo/.Xilinx:/tools/Xilinx/Vivado/2021.1/data/sysgen/hwcosim_compiler/pp_ethernet:/tools/Xilinx/Vivado/2021.1/data/ip/core_licenses
+	 
+	 
+	 MY SOLUTION: 
+
+		sudo cp -r ~/Downloads/Xilinx.lic /home/bingo/.Xilinx/ /tools/Xilinx/Vivado/2021.1/data/sysgen/hwcosim_compiler/pp_ethernet/ /tools/Xilinx/Vivado/2021.1/data/ip/core_licenses/
+	
+	
+
+
+
+
+
+
+	
+	
