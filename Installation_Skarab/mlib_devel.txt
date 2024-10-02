@@ -1,0 +1,93 @@
+############### INSTALL MLIB_DEVEL PACKAGE ##############
+
+mlib_devel package requirements:
+
+	Ubuntu 16.04
+	MATLAB R2018a
+	Vivado 2019.1
+	Python3.5 environment
+	mlibdevel Peralex's master branch
+
+1. Install MATLAB R2018a / Simulink
+
+	cd /path/to/matlab/download/matlab_R2018a_glnxa64.zip
+	mkdir matlab_R2018a
+	unzip matlab_R2018a_glnxa64.zip -d matlab_R2018a
+	cd matlab_R2018a
+	sudo ./install
+
+	After installation, launch MATLAB to test.
+		.matlab in /path/to/MATLAB/R2019a/bin (my case: /usr/local/MATLAB/R2019a/bin)
+
+2. Install Vivado 2019.1
+
+	tar -xvzf Xilinx_Vivado_SDK_2019.1_0524_1430.tar.gz
+	cd Xilinx_Vivado_SDK_2019.1_0524_1430
+	sudo ./xsetup
+	check "Vivado HL System Edition"
+	check "Vivado Design Suite" on "Design Tools"
+
+	After installation, launch Vivado to test.
+
+		sudo ./vivado in /tools/Xilinx/Vivado/2021.1/bin
+
+	To insert the license, click "Help" and "Manage License". Then, you can load your license there.
+
+	Sometimes, this is not sufficient. Then, you also have to insert the license by the following commands:
+
+	sudo cp -r ~/Downloads/Xilinx.lic /home/bingo/.Xilinx/
+	sudo cp -r ~/Downloads/Xilinx.lic /tools/Xilinx/Vivado/2019.1/data/sysgen/hwcosim_compiler/pp_ethernet/
+	sudo cp -r ~/Downloads/Xilinx.lic /tools/Xilinx/Vivado/2019.1/data/ip/core_licenses/
+
+3. Create python environment
+
+	sudo apt install python3-venv
+	create virtual environment: python3 -m venv casper_venv
+	Activate python environment (python3): source casper_venv/bin/activate
+
+4. Download and Install the mlib_devel
+
+	git clone -b master https://github.com/peralex/mlib_devel
+	Open it : cd mlib_devel
+
+	Add the following requirements:
+
+	numpy<1.9
+	colorlog
+	pyaml
+	odict
+	#xml2vhdl requirements
+	lxml==4.3.0
+	pyyaml==3.13
+	-e git+http://github.com/casper-astro/xml2vhdl#egg=xml2vhdl_ox-0.2.2-py3.5.egg&subdirectory=scripts/python/xml2vhdl-ox
+
+	Before install requirements, install python3-dev: sudo apt install python3-dev.
+
+	Then, Install requirements : pip3 install -r requirements.txt
+
+5. Configure startsg.local.example
+
+	export XILINX_PATH=/tools/Xilinx/Vivado/2019.1
+	export MATLAB_PATH=/usr/local/MATLAB/R2018a
+	export PLATFORM=lin64
+	export JASPER_BACKEND=vivado
+	export LD_PRELOAD=${LD_PRELOAD}:"/usr/lib/x86_64-linux-gnu/libexpat.so"
+
+	# Activate a python3 virtual-environment on load
+	export CASPER_PYTHON_VENV_ON_START=/home/bingo/casper_venv
+
+6. Run it using the python3 environment!
+	
+	./startsg startsg.local.example
+	
+	My example: (casper_venv) bingo@bingo:~/mlib_devel$ ./startsg startsg.local.example
+	
+
+
+
+
+
+
+
+
+
