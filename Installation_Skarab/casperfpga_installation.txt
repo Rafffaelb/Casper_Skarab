@@ -1,6 +1,6 @@
 ############# INSTALLING CASPERFPGA PACKAGE ##########
 
-Ubuntu 20.04 from scratch!
+Ubuntu 16.04 from scratch!
 
 1. Install python 2 : sudo apt install python2
 2. Install virtualenv : sudo apt install virtualenv
