@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 #--------------------------------------------------------------------------------------
 # Aapted by Mathews Chirindo - South African Radio Astronomy Obsevatory
@@ -61,6 +62,15 @@ import numpy as np
 actual_channels_ddc_centre_freq = 0.0
 meusdados = []
 
+from optparse import OptionParser
+p = OptionParser()
+#p.set_usage('Spectrometer.py [options]')
+#p.set_description(__doc__)
+p.add_option('-f', '--freq', dest='central_freq', type='int',default=800,
+help='Set the central frequency. default is 800MHz.')
+p.add_option('-d', '--dec', dest='decimation', type='int',default=32,
+help='Set the decimation. default is 32.')
+
 def get_data():
         #get the data...    
 	acc_n=skarabs[0].read_uint('acc_cnt')#acc_n = fpga.read_uint('acc_cnt')
@@ -83,11 +93,11 @@ def get_data():
 		interleave_a.append(a_1[i])
 		#interleave_a.append(a_2[i])
 
-	return acc_n, numpy.array(interleave_a,dtype=numpy.float) 
-        
+	return acc_n, numpy.array(interleave_a,dtype=numpy.float)
+       
 def plot_spectrum():
-        freq_range_mhz_lo = -0.5 * 93.75 +actual_channels_ddc_centre_freq/1.0e6
-        freq_range_mhz_hi = 0.5 * 93.75 +actual_channels_ddc_centre_freq/1.0e6
+        freq_range_mhz_lo = - 0.5 * (3000 / options.decimation) +actual_channels_ddc_centre_freq/1.0e6
+        freq_range_mhz_hi = 0.5 * (3000 / options.decimation) +actual_channels_ddc_centre_freq/1.0e6
         matplotlib.pyplot.clf()
 	acc_n, interleave_a = get_data()
 	interleave_a = interleave_a[::-1]
@@ -99,7 +109,7 @@ def plot_spectrum():
 	#print(np.linspace(-32768./2,32768./2-1,32768).shape,interleave_a.shape)
 	matplotlib.pylab.plot(
                 np.linspace(-32768./2,32768./2-1,32768)
-                    *(-93.75/32768.)+actual_channels_ddc_centre_freq/1.0e6,
+                    *(-(3000 / options.decimation) / 32768.)+actual_channels_ddc_centre_freq/1.0e6,
                 interleave_a,
                 'b'
         )
@@ -108,7 +118,7 @@ def plot_spectrum():
 	matplotlib.pylab.grid()
 	matplotlib.pylab.xlabel('Freq (MHz)')
 	matplotlib.pylab.xlim(freq_range_mhz_lo, freq_range_mhz_hi)
-        #matplotlib.pylab.ylim(0, 1e10)
+    #	matplotlib.pylab.ylim(0, 1e4)
 	fig.canvas.draw()
 	fig.canvas.manager.window.after(100, plot_spectrum)
 
@@ -117,19 +127,13 @@ def plot_spectrum():
 #START OF MAIN:
 if __name__ == '__main__':
         
-        from optparse import OptionParser
-        p = OptionParser()
-        #p.set_usage('Spectrometer.py [options]')
-        #p.set_description(__doc__)
-        p.add_option('-f', '--freq', dest='central_freq', type='int',default=800,
-        help='Set the central frequency. default is 800MHz.')
         #p.add_option('-b', '--fpg', dest='fpgfile',type='str', default='',
         #help='Specify the fpg file to load')
         #args = p.parse_args(sys.argv[1:])
 	(options, args) = p.parse_args()
-        opts_fpgfile = 'bingo_dec16_32k_2024-10-04_1052.fpg'
+        opts_fpgfile = 'bingo_dec16_32k_2024-11-21_1610.fpg'
         opts_acc_len = 5722
-        my_skarab_ip = '10.42.0.152'
+        my_skarab_ip = '10.42.0.12'
         my_args = my_skarab_ip
         if my_args==[]:
                 print 'Please specify a SKARAB board. Run with the -h flag to see all options.\nExiting.'
@@ -311,7 +315,7 @@ try:
         for i in range(skarab_adc_num):
             #skarab_adcs[i].configure_skarab_adc(nyquist_zone,32)
 	    #skarab_adcs[i].configure_skarab_adc(nyquist_zone, 32)
-             skarab_adcs[i].configure_skarab_adc(nyquist_zone, 32,0)
+             skarab_adcs[i].configure_skarab_adc(nyquist_zone, options.decimation,0)
 
 
 	for i in range(skarab_adc_num):

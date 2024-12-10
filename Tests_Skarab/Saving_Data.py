@@ -61,6 +61,17 @@ import numpy as np
 actual_channels_ddc_centre_freq = 0.0
 meusdados = []
 
+from optparse import OptionParser
+p = OptionParser()
+#p.set_usage('spectrometer.py <SKARAB_HOSTNAME_or_IP> [options]')
+#p.set_description(__doc__)
+p.add_option('-f', '--freq', dest='central_freq', type='int',default=800,
+help='Set the central frequency. default is 800MHz.')
+p.add_option('-d', '--dec', dest='decimation', type='int',default=32,
+help='Set the decimation. default is 32.')
+p.add_option('-c', '--counter_check', dest='counter_checkpoint', type='int',default=10,
+help='Set the maximum number of saved files. default is 10.')
+
 def get_data():
         #get the data...    
 	acc_n=skarabs[0].read_uint('acc_cnt')#acc_n = fpga.read_uint('acc_cnt')
@@ -89,19 +100,13 @@ def accumulating_data():
 #START OF MAIN:
 if __name__ == '__main__':
         
-        from optparse import OptionParser
-        p = OptionParser()
-        #p.set_usage('spectrometer.py <SKARAB_HOSTNAME_or_IP> [options]')
-        #p.set_description(__doc__)
-        p.add_option('-f', '--freq', dest='central_freq', type='int',default=800,
-        help='Set the central frequency. default is 800MHz.')
         #p.add_option('-b', '--fpg', dest='fpgfile',type='str', default='',
         #help='Specify the fpg file to load')
         #opts, args = p.parse_args(sys.argv[1:])
 	(options, args) = p.parse_args()
         opts_fpgfile = 'bingo_dec16_32k_2024-10-04_1052.fpg'
         opts_acc_len = 5722
-        my_skarab_ip = '10.42.0.152'
+        my_skarab_ip = '10.42.0.12'
         my_args = my_skarab_ip
         if my_args==[]:
                 print 'Please specify a SKARAB board. Run with the -h flag to see all options.\nExiting.'
@@ -280,7 +285,7 @@ try:
         for i in range(skarab_adc_num):
             #skarab_adcs[i].configure_skarab_adc(nyquist_zone,32)
 	    #skarab_adcs[i].configure_skarab_adc(nyquist_zone, 32)
-             skarab_adcs[i].configure_skarab_adc(nyquist_zone, 32,0)
+             skarab_adcs[i].configure_skarab_adc(nyquist_zone, options.decimation,0)
 
 
 	for i in range(skarab_adc_num):
@@ -444,6 +449,7 @@ try:
         print("---------------------------------------------------------------")
 
     	counter = 0
+        counter_checkpoints = 0
 	central_freq_MHZ = channels_ddc_centre_freq / 1000000
 	inicio = dt.datetime.now()
 	inicio_str = inicio.strftime("_%Y-%m-%d_%H%M%S")
@@ -463,18 +469,23 @@ try:
 
 		    	aux_final = dt.datetime.now()
 		    	aux_final_str = aux_final.strftime("_%Y-%m-%d_%H%M%S")
-		    	aux_file_name = 'Jordany_dados_Fc%d_MHz_Ti%s_Tf%s_myaccn_%d' % (central_freq_MHZ, aux_inicio_str, aux_final_str, my_acc_n)
+		    	aux_file_name = 'Jordany_dados_Fc%d_Dec%d_Ti%s_Tf%s_myaccn_%d' % (central_freq_MHZ, options.decimation, aux_inicio_str, aux_final_str, my_acc_n)
 
 		    	np.save(aux_file_name, np.array(aux_meusdados))
 
 		    	aux_inicio_str = aux_final_str
 		    	aux_meusdados = []
+
+                	counter_checkpoints += 1
+
+                	if ((counter_checkpoints) == options.counter_checkpoint):
+                    		break
     	except KeyboardInterrupt:
         	final = dt.datetime.now()
         	tempo = final - inicio
         	print tempo
         	final_str=final.strftime("_%Y-%m-%d_%H%M%S")
-        	file_name = 'Jordany_dados_Fc%d_MHz_Ti%s_Tf%s' % (central_freq_MHZ, inicio_str, final_str)
+        	file_name = 'Jordany_dados_Fc%d_Dec%d_Ti%s_Tf%s' % (central_freq_MHZ, options.decimation, inicio_str, final_str)
         	#np.save(file_name,np.array(meusdados))
         	#os.remove(str(aux_file_name) + '.npy')
 		print 'SKARAB STOPPED RUNNING.'
