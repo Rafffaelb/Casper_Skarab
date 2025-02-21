@@ -7,7 +7,7 @@ Ubuntu 16.04 from scratch!
 3. Create virtualenv (python2): virtualenv -p python2 cfpga_venv
 4. Source virtualenv (python2): source cfpga_venv/bin/activate
 5. Install git : sudo apt install git
-6. clone CASPER repository : https://github.com/casper-astro/casperfpga.git
+6. clone CASPER repository : git clone https://github.com/Rafffaelb/casperfpga.git
 7. Enter CASPER repository : cd casperfpga
 8. Install apt-build requirements : sudo apt install build-essential && sudo apt install python-dev
 9. Install requirements : pip install -r requirements.txt
@@ -16,26 +16,28 @@ Ubuntu 16.04 from scratch!
 12. Come back to casperfpga folder : cd ..
 13. Install the casperfpga package : pip install .
 14. Exit the casperfpga folder : cd ..
-15. Launch IPython : ipython (always launch with python environment activate)
+15. Install matplotlib : pip install matplotlib
+16. Launch IPython : ipython (always launch with python environment activate)
 
 ############### INSIDE IPYTHON ###############
 
-16. Import casperfpga package : import casperfpga
-17. See casperfpga version : casperfpga.__version__
+17. Import casperfpga package : import casperfpga
+18. See casperfpga version : casperfpga.__version__
 
 ############## CONFIGURING ETHERNET ############
 
-18. Install net-tools: sudo apt install net-tools
-19. Check the 40GbE ethernet connection : arp -a
+19. Install net-tools: sudo apt install net-tools
+20. Check the 40GbE ethernet connection : arp -a
 
 In our case is "(10.42.0.201) at 06:50:02:0f:02:01 [ether] on enp1s0f0"
 
-20. Go to Network Settings, set "Shared to other computers" for both IPv4 and IPv6 methods and set MTU 9000 in Identity. Restart 40GbE connection after this.
+21. Go to Network Settings, set "Shared to other computers" for IPv4 and "Ignore" for IPv6 methods
+22. Set MTU 9000 in Identity. Restart 40GbE connection after this.
 
 ############## UPLOAD THE FILE .FPG TO SKARAB #######
 
-21. fpga = casperfpga.CasperFpga('10.42.0.201')
-22. fpga.upload_to_ram_and_program('file.fpg')
+23. fpga = casperfpga.CasperFpga('10.42.0.201')
+24. fpga.upload_to_ram_and_program('file.fpg')
 
 
 
